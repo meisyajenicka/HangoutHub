@@ -1,25 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { activitiesAPI } from "../api/client";
+import { getActivities } from "../data/localStorage";
 
-export default function Dashboard({ user, plans = [] }) {
+export default function Dashboard({ user, plans }) {
   const [recommendations, setRecommendations] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
-      try {
-        const response = await activitiesAPI.getAll();
-        const data = Array.isArray(response.data) ? response.data : [];
-        setRecommendations(data.slice(0, 3));
-      } catch (error) {
-        console.error("Error fetching recommendations:", error);
-        setRecommendations([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchRecommendations();
+    const activities = getActivities();
+    if (Array.isArray(activities) && activities.length > 0) {
+      setRecommendations(activities.slice(0, 3));
+    }
   }, []);
 
   const plansArray = Array.isArray(plans) ? plans : [];
@@ -28,11 +18,8 @@ export default function Dashboard({ user, plans = [] }) {
   const plannedPlans = plansArray.filter(p => p.status === "planned").length;
   const recentPlans = plansArray.slice(-3).reverse();
 
-  const recommendationsArray = Array.isArray(recommendations) ? recommendations : [];
-
   return (
-    <div className="container">
-      {/* Welcome Banner */}
+    <div className="container fade-in">
       <div style={{
         background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
         color: 'white',
@@ -40,13 +27,10 @@ export default function Dashboard({ user, plans = [] }) {
         borderRadius: '16px',
         marginBottom: '30px'
       }}>
-        <h1 style={{ fontSize: '28px', marginBottom: '10px' }}>
-          Hi, {user?.name || 'User'}! 👋
-        </h1>
+        <h1 style={{ fontSize: '28px', marginBottom: '10px' }}>Hi, {user?.name || 'User'}! 👋</h1>
         <p>Ready for your next adventure?</p>
       </div>
 
-      {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '40px' }}>
         <div className="card" style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '32px', marginBottom: '10px' }}>📋</div>
@@ -65,7 +49,6 @@ export default function Dashboard({ user, plans = [] }) {
         </div>
       </div>
 
-      {/* Recent Plans */}
       {recentPlans.length > 0 && (
         <div style={{ marginBottom: '40px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -75,9 +58,9 @@ export default function Dashboard({ user, plans = [] }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
             {recentPlans.map(plan => (
               <div key={plan.id} className="card" style={{ padding: '16px' }}>
-                <h3 style={{ marginBottom: '5px' }}>{plan.activity?.title || plan.title}</h3>
+                <h3 style={{ marginBottom: '5px' }}>{plan.title}</h3>
                 <p style={{ color: '#666', fontSize: '14px' }}>📅 {plan.planDate}</p>
-                <span className="category">{plan.activity?.category || plan.category}</span>
+                <span className="category">{plan.category}</span>
                 <span style={{ 
                   marginLeft: '10px',
                   fontSize: '12px',
@@ -94,19 +77,16 @@ export default function Dashboard({ user, plans = [] }) {
         </div>
       )}
 
-      {/* Recommendations */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2>✨ Recommended for You</h2>
           <Link to="/explore" style={{ color: '#8B5CF6' }}>View all →</Link>
         </div>
-        {loading ? (
-          <p>Loading recommendations...</p>
-        ) : recommendationsArray.length === 0 ? (
-          <p style={{ textAlign: 'center', color: '#666' }}>No recommendations available</p>
+        {recommendations.length === 0 ? (
+          <p style={{ textAlign: 'center', color: '#666', padding: '20px' }}>No activities available.</p>
         ) : (
           <div className="grid">
-            {recommendationsArray.map(activity => (
+            {recommendations.map(activity => (
               <Link key={activity.id} to={`/activity/${activity.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div className="activity-card">
                   <img src={activity.image} alt={activity.title} />

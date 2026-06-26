@@ -11,53 +11,13 @@ Pengguna dapat:
 - Menyimpan rencana ke "My Plan"
 - Menandai kegiatan yang sudah selesai
 
-## Tema
-**Hiburan & Lifestyle** - Panduan Wisata Lokal Sumatera Barat
-## Fitur Aplikasi
--------------------------------------------------------------------------
-|       Fitur        |                 Keterangan                       |
-|--------------------|--------------------------------------------------|
-|Autentikasi         | Register, Login, Logout dengan JWT               |
-|Dashboard           | Statistik rencana & rekomendasi kegiatan         |
-|Explore             | 25+ kegiatan dengan filter kategori & kota       |
-|Detail Activity     | Informasi lengkap kegiatan + atur durasi sendiri |
-|My Plan             | Kelola rencana (tambah, selesai, hapus)          |
-|Profile             | Informasi user & statistik                       |
-|Dark/light Mode     | Toggle dark/light mode                           |
-|Animasi             | Transisi halaman & hover effects                 |
--------------------------------------------------------------------------
-
-## Teknologi yang Digunakan
-
-### Frontend
-- **React 18** - Library UI
-- **Vite** - Build tool
-- **React Router DOM** - Navigasi
-- **Axios** - HTTP Client
-- **CSS3** - Styling (tanpa framework)
-
-### Backend
-- **Express.js** - Server
-- **JWT** - Autentikasi
-- **bcryptjs** - Password hashing
-- **db.json** - Database (JSON)
-
 ## Struktur Folder
 hangouthub/
 │
 ├── README.md # Dokumentasi proyek
 │
-├── backend/ # Backend Express.js
-│ ├── server.js # Main server
-│ ├── db.json # Database (JSON)
-│ ├── package.json # Dependencies backend
-│ ├── package-lock.json
-│ └── .env # Environment variables
-│
 ├── frontend/ # Frontend React + Vite
 │ ├── src/
-│ │ ├── api/
-│ │ │ └── client.js # Axios API client
 │ │ ├── components/
 │ │ │ ├── Navbar.jsx # Navigasi
 │ │ │ └── LoadingSpinner.jsx # Loading indicator

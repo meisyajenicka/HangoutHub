@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authAPI } from "../api/client";
+import { getUsers, saveUsers } from "../data/localStorage";
 
 export default function Register({ onLogin }) {
   const [name, setName] = useState("");
@@ -11,7 +11,7 @@ export default function Register({ onLogin }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
 
@@ -27,15 +27,27 @@ export default function Register({ onLogin }) {
 
     setLoading(true);
 
-    try {
-      const response = await authAPI.register({ name, email, password });
-      onLogin(response.data.user, response.data.token);
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.response?.data?.message || "Registrasi gagal");
-    } finally {
+    const users = getUsers();
+    if (users.find(u => u.email === email)) {
+      setError("Email sudah terdaftar");
       setLoading(false);
+      return;
     }
+
+    const newUser = {
+      id: Date.now().toString(),
+      name,
+      email,
+      password,
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=8B5CF6&color=fff`,
+      createdAt: new Date().toISOString()
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+    onLogin(newUser);
+    navigate("/dashboard");
+    setLoading(false);
   };
 
   return (
@@ -52,10 +64,34 @@ export default function Register({ onLogin }) {
         )}
 
         <form onSubmit={handleSubmit}>
-          <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} required />
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          <input type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
           <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
             {loading ? "Loading..." : "Register"}
           </button>

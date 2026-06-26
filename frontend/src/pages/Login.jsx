@@ -1,30 +1,29 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { authAPI } from "../api/client";
+import { getUsers } from "../data/localStorage";
 
-export default function Login() {
+export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    try {
-      const response = await authAPI.login({ email, password });
-      login(response.data.user, response.data.token);
+    const users = getUsers();
+    const found = users.find(u => u.email === email && u.password === password);
+
+    if (found) {
+      onLogin(found);
       navigate("/dashboard");
-    } catch (err) {
-      setError(err.response?.data?.message || "Login gagal");
-    } finally {
-      setLoading(false);
+    } else {
+      setError("Email atau password salah");
     }
+    setLoading(false);
   };
 
   return (
@@ -62,6 +61,10 @@ export default function Login() {
 
         <p style={{ marginTop: '20px' }}>
           Don't have account? <Link to="/register" style={{ color: '#8B5CF6' }}>Sign up</Link>
+        </p>
+
+        <p style={{ fontSize: '12px', color: '#999', marginTop: '16px' }}>
+          Demo: demo@demo.com / 123456
         </p>
       </div>
     </div>

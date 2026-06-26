@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { activitiesAPI } from "../api/client";
+import { getActivities } from "../data/localStorage";
+
+const durationOptions = [
+  "30 menit", "1 jam", "1.5 jam", "2 jam", "2.5 jam", "3 jam", "3.5 jam", 
+  "4 jam", "5 jam", "6 jam", "8 jam", "1 hari", "2 hari", "3 hari"
+];
 
 export default function ActivityDetail({ onAddToPlan }) {
   const { id } = useParams();
@@ -10,78 +15,37 @@ export default function ActivityDetail({ onAddToPlan }) {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedDuration, setSelectedDuration] = useState("2 jam");
 
-  // Pilihan durasi
-  const durationOptions = [
-    "30 menit",
-    "1 jam",
-    "1.5 jam",
-    "2 jam",
-    "2.5 jam",
-    "3 jam",
-    "3.5 jam",
-    "4 jam",
-    "5 jam",
-    "6 jam",
-    "8 jam",
-    "1 hari",
-    "2 hari",
-    "3 hari"
-  ];
-
   useEffect(() => {
-    const fetchActivity = async () => {
-      try {
-        const response = await activitiesAPI.getById(id);
-        setActivity(response.data);
-        // Set default durasi dari data
-        if (response.data.duration) {
-          setSelectedDuration(response.data.duration);
-        }
-      } catch (error) {
-        console.error("Error fetching activity:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchActivity();
+    const activities = getActivities();
+    const found = activities.find(a => a.id === id);
+    if (found) {
+      setActivity(found);
+      setSelectedDuration(found.duration || "2 jam");
+    }
+    setLoading(false);
   }, [id]);
 
-  const handleAdd = async () => {
-    try {
-      const planData = {
-        activityId: id,
-        planDate: selectedDate,
-        duration: selectedDuration // Kirim durasi yang dipilih
-      };
-      await onAddToPlan(id, selectedDate, selectedDuration);
-      alert(`✅ "${activity.title}" added to your plan! (${selectedDuration})`);
-      navigate('/my-plan');
-    } catch (error) {
-      alert(error.response?.data?.message || "Failed to add plan");
-    }
+  const handleAdd = () => {
+    onAddToPlan(activity, selectedDuration);
+    alert(`✅ "${activity.title}" added to your plan! (${selectedDuration})`);
+    navigate('/my-plan');
   };
 
   if (loading) {
-    return (
-      <div className="container" style={{ textAlign: 'center', marginTop: '50px' }}>
-        <p>Loading...</p>
-      </div>
-    );
+    return <div className="container" style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</div>;
   }
 
   if (!activity) {
     return (
       <div className="container" style={{ textAlign: 'center', marginTop: '100px' }}>
         <h2>Activity not found</h2>
-        <button className="btn btn-primary" onClick={() => navigate('/explore')}>
-          Back to Explore
-        </button>
+        <button className="btn btn-primary" onClick={() => navigate('/explore')}>Back to Explore</button>
       </div>
     );
   }
 
   return (
-    <div className="container" style={{ maxWidth: '800px' }}>
+    <div className="container fade-in" style={{ maxWidth: '800px' }}>
       <button onClick={() => navigate(-1)} style={{
         background: 'none',
         border: 'none',
@@ -89,9 +53,7 @@ export default function ActivityDetail({ onAddToPlan }) {
         cursor: 'pointer',
         marginBottom: '20px',
         fontSize: '16px'
-      }}>
-        ← Back
-      </button>
+      }}>← Back</button>
 
       <img src={activity.image} alt={activity.title} className="detail-image" />
 
@@ -99,9 +61,7 @@ export default function ActivityDetail({ onAddToPlan }) {
 
       <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
         <span className="category">{activity.category}</span>
-        <span className="category" style={{ background: '#E0F2FE', color: '#0369A1' }}>
-          📍 {activity.city}
-        </span>
+        <span className="category" style={{ background: '#E0F2FE', color: '#0369A1' }}>📍 {activity.city}</span>
       </div>
 
       <p className="price" style={{ fontSize: '24px', marginBottom: '20px' }}>{activity.price}</p>
@@ -117,35 +77,21 @@ export default function ActivityDetail({ onAddToPlan }) {
         </div>
       </div>
 
-      <p style={{ lineHeight: '1.6', marginBottom: '30px', color: '#444' }}>
-        {activity.description}
-      </p>
+      <p style={{ lineHeight: '1.6', marginBottom: '30px', color: '#444' }}>{activity.description}</p>
 
-      {/* Pilih Tanggal */}
       <div style={{ marginBottom: '20px' }}>
-        <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
-          📅 Pilih Tanggal
-        </label>
+        <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>📅 Pilih Tanggal</label>
         <input
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          style={{ 
-            width: 'auto', 
-            padding: '10px', 
-            border: '1px solid #ddd', 
-            borderRadius: '8px',
-            fontSize: '16px'
-          }}
+          style={{ width: 'auto', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '16px' }}
           min={new Date().toISOString().split('T')[0]}
         />
       </div>
 
-      {/* ⏰ PILIH DURASI SENDIRI */}
       <div style={{ marginBottom: '25px' }}>
-        <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
-          ⏰ Atur Durasi
-        </label>
+        <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>⏰ Atur Durasi</label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {durationOptions.map(dur => (
             <button
@@ -167,9 +113,6 @@ export default function ActivityDetail({ onAddToPlan }) {
             </button>
           ))}
         </div>
-        <p style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
-          💡 Klik durasi yang kamu inginkan
-        </p>
       </div>
 
       <button onClick={handleAdd} className="btn btn-primary" style={{ width: '100%', padding: '15px', fontSize: '16px' }}>

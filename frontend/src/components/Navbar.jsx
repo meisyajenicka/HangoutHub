@@ -1,88 +1,56 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useState, useEffect } from "react";
 
-export default function Navbar() {
-  const { user, logout, darkMode, toggleDarkMode } = useAuth();
+export default function Navbar({ user, onLogout }) {
   const navigate = useNavigate();
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('hangouthub_darkmode') === 'true';
+  });
 
-  console.log("Dark Mode:", darkMode); 
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('hangouthub_darkmode', darkMode);
+  }, [darkMode]);
+
+  const toggleDarkMode = () => setDarkMode(prev => !prev);
 
   const handleLogout = () => {
-    logout();
+    onLogout();
     navigate("/login");
   };
 
   if (!user) return null;
 
   return (
-    <nav className="navbar" style={{ 
-      backgroundColor: darkMode ? '#1a1a2e' : 'white',
-      borderBottom: darkMode ? '1px solid #334155' : '1px solid #e5e7eb',
-      transition: 'all 0.3s ease'
-    }}>
-      <Link to="/dashboard" style={{ 
-        fontWeight: 'bold', 
-        fontSize: '20px', 
-        textDecoration: 'none',
-        color: darkMode ? '#e2e8f0' : '#111827'
-      }}>
+    <nav className="navbar">
+      <Link to="/dashboard" style={{ fontWeight: 'bold', fontSize: '20px', textDecoration: 'none' }}>
         🎯 HangoutHub
       </Link>
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <Link to="/dashboard" style={{ 
-          textDecoration: 'none', 
-          color: darkMode ? '#e2e8f0' : '#333',
-          transition: 'color 0.3s ease'
-        }}>Dashboard</Link>
-        <Link to="/explore" style={{ 
-          textDecoration: 'none', 
-          color: darkMode ? '#e2e8f0' : '#333',
-          transition: 'color 0.3s ease'
-        }}>Explore</Link>
-        <Link to="/my-plan" style={{ 
-          textDecoration: 'none', 
-          color: darkMode ? '#e2e8f0' : '#333',
-          transition: 'color 0.3s ease'
-        }}>My Plan</Link>
-        <Link to="/profile" style={{ 
-          textDecoration: 'none', 
-          color: darkMode ? '#e2e8f0' : '#333',
-          transition: 'color 0.3s ease'
-        }}>Profile</Link>
+        <Link to="/dashboard" style={{ textDecoration: 'none', color: 'inherit' }}>Dashboard</Link>
+        <Link to="/explore" style={{ textDecoration: 'none', color: 'inherit' }}>Explore</Link>
+        <Link to="/my-plan" style={{ textDecoration: 'none', color: 'inherit' }}>My Plan</Link>
+        <Link to="/profile" style={{ textDecoration: 'none', color: 'inherit' }}>Profile</Link>
 
-        {/* Dark Mode Toggle */}
         <button
-          onClick={() => {
-            console.log("Toggle dark mode clicked");
-            toggleDarkMode();
-          }}
+          onClick={toggleDarkMode}
           style={{
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            fontSize: '24px',
+            fontSize: '20px',
             padding: '4px 8px',
-            borderRadius: '8px',
-            transition: 'all 0.3s ease',
-            color: darkMode ? '#e2e8f0' : '#333'
+            borderRadius: '8px'
           }}
-          title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         >
           {darkMode ? '☀️' : '🌙'}
         </button>
 
-        <button 
-          onClick={handleLogout} 
-          className="btn btn-danger" 
-          style={{ 
-            padding: '6px 16px',
-            backgroundColor: '#EF4444',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer'
-          }}
-        >
+        <button onClick={handleLogout} className="btn btn-danger" style={{ padding: '6px 16px' }}>
           Logout
         </button>
       </div>

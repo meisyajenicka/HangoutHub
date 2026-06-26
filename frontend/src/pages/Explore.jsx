@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { activitiesAPI } from "../api/client";
+import { getActivities } from "../data/localStorage";
 
 export default function Explore() {
   const [activities, setActivities] = useState([]);
@@ -14,37 +14,13 @@ export default function Explore() {
   const categories = ["all", "Wisata Alam", "Wisata Budaya", "Kuliner", "Olahraga"];
 
   useEffect(() => {
-    fetchActivities();
-    fetchCities();
+    const data = getActivities();
+    setActivities(data);
+    setFilteredActivities(data);
+    const cityList = [...new Set(data.map(a => a.city))];
+    setCities(["all", ...cityList]);
+    setLoading(false);
   }, []);
-
-  const fetchActivities = async () => {
-    try {
-      const response = await activitiesAPI.getAll();
-      console.log("Data dari API:", response.data); // Cek di console
-      
-      const data = Array.isArray(response.data) ? response.data : [];
-      setActivities(data);
-      setFilteredActivities(data);
-    } catch (error) {
-      console.error("Error fetching activities:", error);
-      setActivities([]);
-      setFilteredActivities([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCities = async () => {
-    try {
-      const response = await activitiesAPI.getCities();
-      const data = Array.isArray(response.data) ? response.data : [];
-      setCities(["all", ...data]);
-    } catch (error) {
-      console.error("Error fetching cities:", error);
-      setCities(["all"]);
-    }
-  };
 
   useEffect(() => {
     let filtered = [...activities];
@@ -68,18 +44,13 @@ export default function Explore() {
   }, [activities, selectedCategory, selectedCity, search]);
 
   if (loading) {
-    return (
-      <div className="container" style={{ textAlign: 'center', marginTop: '50px' }}>
-        <p>Loading activities...</p>
-      </div>
-    );
+    return <div className="container" style={{ textAlign: 'center', marginTop: '50px' }}>Loading...</div>;
   }
 
   return (
-    <div className="container">
+    <div className="container fade-in">
       <h1 style={{ marginBottom: '20px' }}>Explore Activities</h1>
 
-      {/* Search */}
       <input
         type="text"
         placeholder="🔍 Search activities..."
@@ -88,11 +59,8 @@ export default function Explore() {
         style={{ marginBottom: '20px', padding: '12px', width: '100%', borderRadius: '8px', border: '1px solid #ddd' }}
       />
 
-      {/* Filter by Category */}
       <div style={{ marginBottom: '15px' }}>
-        <label style={{ fontSize: '14px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
-          Category
-        </label>
+        <label style={{ fontSize: '14px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Category</label>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {categories.map(cat => (
             <button
@@ -114,12 +82,9 @@ export default function Explore() {
         </div>
       </div>
 
-      {/* Filter by City */}
       {cities.length > 0 && (
         <div style={{ marginBottom: '20px' }}>
-          <label style={{ fontSize: '14px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>
-            📍 City
-          </label>
+          <label style={{ fontSize: '14px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>📍 City</label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {cities.map(city => (
               <button
@@ -142,13 +107,10 @@ export default function Explore() {
         </div>
       )}
 
-      {/* Results */}
       {filteredActivities.length === 0 ? (
         <div style={{ textAlign: 'center', marginTop: '50px', color: '#666' }}>
           <p>No activities found</p>
-          <p style={{ fontSize: '14px', marginTop: '10px' }}>
-            Total activities in database: {activities.length}
-          </p>
+          <p style={{ fontSize: '14px', marginTop: '10px' }}>Total activities: {activities.length}</p>
         </div>
       ) : (
         <div className="grid">
