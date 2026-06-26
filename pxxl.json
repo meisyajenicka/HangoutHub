@@ -1,0 +1,19 @@
+{
+  "builds": [
+    {
+      "src": "backend/**",
+      "use": "node",
+      "config": {
+        "start": "node server.js",
+        "install": "npm install",
+        "workdir": "backend"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "backend/server.js"
+    }
+  ]
+}
