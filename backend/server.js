@@ -160,7 +160,7 @@ app.get('/api/auth/profile', authenticate, (req, res) => {
 
 // ============ ACTIVITIES ROUTES ============
 
-// Get all activities (with filters)
+// Get all activities 
 app.get('/api/activities', (req, res) => {
   try {
     const db = readDB();
@@ -208,7 +208,7 @@ app.get('/api/activities/:id', (req, res) => {
   }
 });
 
-// Get cities (for filter)
+// Get cities 
 app.get('/api/cities', (req, res) => {
   try {
     const db = readDB();

@@ -1,16 +1,83 @@
-# React + Vite
+# 🎯 HangoutHub
+> Aplikasi Perencana Kegiatan Hiburan & Lifestyle - Sumatera Barat
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Deskripsi Proyek
+**HangoutHub** adalah aplikasi web interaktif yang membantu pengguna menemukan dan merencanakan kegiatan hiburan & lifestyle di Sumatera Barat. Aplikasi ini menyediakan 25+ kegiatan dari berbagai kategori seperti Wisata Alam, Wisata Budaya, Kuliner, dan Olahraga.
 
-Currently, two official plugins are available:
+Pengguna dapat:
+- Menjelajahi berbagai kegiatan
+- Filter berdasarkan kategori dan kota
+- Mengatur durasi kegiatan sendiri
+- Menyimpan rencana ke "My Plan"
+- Menandai kegiatan yang sudah selesai
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tema
+**Hiburan & Lifestyle** - Panduan Wisata Lokal Sumatera Barat
+## Fitur Aplikasi
+-------------------------------------------------------------------------
+|       Fitur        |                 Keterangan                       |
+|--------------------|--------------------------------------------------|
+|Autentikasi         | Register, Login, Logout dengan JWT               |
+|Dashboard           | Statistik rencana & rekomendasi kegiatan         |
+|Explore             | 25+ kegiatan dengan filter kategori & kota       |
+|Detail Activity     | Informasi lengkap kegiatan + atur durasi sendiri |
+|My Plan             | Kelola rencana (tambah, selesai, hapus)          |
+|Profile             | Informasi user & statistik                       |
+|Dark/light Mode     | Toggle dark/light mode                           |
+|Animasi             | Transisi halaman & hover effects                 |
+-------------------------------------------------------------------------
 
-## React Compiler
+## Teknologi yang Digunakan
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Frontend
+- **React 18** - Library UI
+- **Vite** - Build tool
+- **React Router DOM** - Navigasi
+- **Axios** - HTTP Client
+- **CSS3** - Styling (tanpa framework)
 
-## Expanding the ESLint configuration
+### Backend
+- **Express.js** - Server
+- **JWT** - Autentikasi
+- **bcryptjs** - Password hashing
+- **db.json** - Database (JSON)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Struktur Folder
+hangouthub/
+│
+├── README.md # Dokumentasi proyek
+│
+├── backend/ # Backend Express.js
+│ ├── server.js # Main server
+│ ├── db.json # Database (JSON)
+│ ├── package.json # Dependencies backend
+│ ├── package-lock.json
+│ └── .env # Environment variables
+│
+├── frontend/ # Frontend React + Vite
+│ ├── src/
+│ │ ├── api/
+│ │ │ └── client.js # Axios API client
+│ │ ├── components/
+│ │ │ ├── Navbar.jsx # Navigasi
+│ │ │ └── LoadingSpinner.jsx # Loading indicator
+│ │ ├── context/
+│ │ │ └── AuthContext.jsx # Auth state management
+│ │ ├── pages/
+│ │ │ ├── Login.jsx # Halaman login
+│ │ │ ├── Register.jsx # Halaman register
+│ │ │ ├── Dashboard.jsx # Beranda
+│ │ │ ├── Explore.jsx # Daftar kegiatan
+│ │ │ ├── ActivityDetail.jsx # Detail kegiatan (dynamic route)
+│ │ │ ├── MyPlan.jsx # Kelola rencana
+│ │ │ └── Profile.jsx # Profil user
+│ │ ├── App.jsx # Main app
+│ │ ├── main.jsx # Entry point
+│ │ └── index.css # Global styling + dark mode
+│ ├── index.html
+│ ├── package.json
+│ ├── package-lock.json
+│ ├── vite.config.js
+│ └── .env # Environment variables
+│
+└── .gitignore

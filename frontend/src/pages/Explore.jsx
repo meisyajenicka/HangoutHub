@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { activitiesAPI } from "../api/client";
-import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function Explore() {
   const [activities, setActivities] = useState([]);
@@ -11,17 +10,8 @@ export default function Explore() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedCity, setSelectedCity] = useState("all");
   const [cities, setCities] = useState([]);
-  const [userLocation, setUserLocation] = useState(null);
-  const [locationLoading, setLocationLoading] = useState(false);
-  const [nearbyMode, setNearbyMode] = useState(false);
-  const [nearbyCity, setNearbyCity] = useState(null);
 
-  const categories = [
-  "all", 
-  "Wisata Alam", 
-  "Wisata Budaya", 
-  "Kuliner", 
-  "Olahraga"];
+  const categories = ["all", "Wisata Alam", "Wisata Budaya", "Kuliner", "Olahraga"];
 
   useEffect(() => {
     fetchActivities();
@@ -31,10 +21,15 @@ export default function Explore() {
   const fetchActivities = async () => {
     try {
       const response = await activitiesAPI.getAll();
-      setActivities(response.data);
-      setFilteredActivities(response.data);
+      console.log("Data dari API:", response.data); // Cek di console
+      
+      const data = Array.isArray(response.data) ? response.data : [];
+      setActivities(data);
+      setFilteredActivities(data);
     } catch (error) {
       console.error("Error fetching activities:", error);
+      setActivities([]);
+      setFilteredActivities([]);
     } finally {
       setLoading(false);
     }
@@ -43,67 +38,15 @@ export default function Explore() {
   const fetchCities = async () => {
     try {
       const response = await activitiesAPI.getCities();
-      setCities(["all", ...response.data]);
+      const data = Array.isArray(response.data) ? response.data : [];
+      setCities(["all", ...data]);
     } catch (error) {
       console.error("Error fetching cities:", error);
+      setCities(["all"]);
     }
   };
 
-  const getLocation = () => {
-    setLocationLoading(true);
-    setNearbyMode(true);
-    
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation({ lat: latitude, lng: longitude });
-          
-          try {
-            const response = await activitiesAPI.getNearby(latitude, longitude);
-            setNearbyCity(response.data.nearestCity);
-            setFilteredActivities(response.data.activities);
-            
-            // Reset filters
-            setSelectedCategory("all");
-            setSelectedCity("all");
-            setSearch("");
-          } catch (error) {
-            console.error("Error fetching nearby:", error);
-            alert("Gagal mengambil kegiatan terdekat");
-          } finally {
-            setLocationLoading(false);
-          }
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          alert("Mohon izinkan akses lokasi untuk fitur Near Me");
-          setLocationLoading(false);
-          setNearbyMode(false);
-        }
-      );
-    } else {
-      alert("Browser tidak mendukung geolocation");
-      setLocationLoading(false);
-      setNearbyMode(false);
-    }
-  };
-
-  // Reset ke semua kegiatan
-  const resetToAll = () => {
-    setNearbyMode(false);
-    setUserLocation(null);
-    setNearbyCity(null);
-    setSelectedCategory("all");
-    setSelectedCity("all");
-    setSearch("");
-    setFilteredActivities(activities);
-  };
-
-  // Filter logic
   useEffect(() => {
-    if (nearbyMode) return; // Skip filter if in nearby mode
-    
     let filtered = [...activities];
 
     if (selectedCategory !== "all") {
@@ -122,73 +65,19 @@ export default function Explore() {
     }
 
     setFilteredActivities(filtered);
-  }, [activities, selectedCategory, selectedCity, search, nearbyMode]);
+  }, [activities, selectedCategory, selectedCity, search]);
 
-  if (loading) return <LoadingSpinner />;
+  if (loading) {
+    return (
+      <div className="container" style={{ textAlign: 'center', marginTop: '50px' }}>
+        <p>Loading activities...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1>Explore Activities</h1>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            onClick={getLocation}
-            disabled={locationLoading}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '12px',
-              border: 'none',
-              background: nearbyMode ? '#10B981' : '#8B5CF6',
-              color: 'white',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '14px',
-              opacity: locationLoading ? 0.7 : 1
-            }}
-          >
-            {locationLoading ? '⏳ Getting...' : nearbyMode ? '📍 Near You' : '📍 Near Me'}
-          </button>
-          
-          {nearbyMode && (
-            <button
-              onClick={resetToAll}
-              style={{
-                padding: '10px 20px',
-                borderRadius: '12px',
-                border: '1px solid #ddd',
-                background: 'white',
-                color: '#333',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              ✕ Reset
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Nearby Mode Info */}
-      {nearbyMode && nearbyCity && (
-        <div style={{
-          background: '#D1FAE5',
-          padding: '12px 16px',
-          borderRadius: '12px',
-          marginBottom: '20px',
-          color: '#065F46',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <span>
-            📍 Menampilkan kegiatan di <strong>{nearbyCity}</strong> 
-            {userLocation && ` (berdasarkan lokasi Anda)`}
-          </span>
-          <span style={{ fontSize: '14px' }}>
-            {filteredActivities.length} kegiatan ditemukan
-          </span>
-        </div>
-      )}
+      <h1 style={{ marginBottom: '20px' }}>Explore Activities</h1>
 
       {/* Search */}
       <input
@@ -196,8 +85,7 @@ export default function Explore() {
         placeholder="🔍 Search activities..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{ marginBottom: '20px' }}
-        disabled={nearbyMode}
+        style={{ marginBottom: '20px', padding: '12px', width: '100%', borderRadius: '8px', border: '1px solid #ddd' }}
       />
 
       {/* Filter by Category */}
@@ -210,16 +98,14 @@ export default function Explore() {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              disabled={nearbyMode}
               style={{
                 padding: '6px 16px',
                 borderRadius: '20px',
                 border: 'none',
                 background: selectedCategory === cat ? '#8B5CF6' : '#e5e7eb',
                 color: selectedCategory === cat ? 'white' : '#333',
-                cursor: nearbyMode ? 'not-allowed' : 'pointer',
-                fontSize: '13px',
-                opacity: nearbyMode ? 0.5 : 1
+                cursor: 'pointer',
+                fontSize: '13px'
               }}
             >
               {cat === 'all' ? 'All' : cat}
@@ -239,16 +125,14 @@ export default function Explore() {
               <button
                 key={city}
                 onClick={() => setSelectedCity(city)}
-                disabled={nearbyMode}
                 style={{
                   padding: '6px 16px',
                   borderRadius: '20px',
                   border: 'none',
                   background: selectedCity === city ? '#8B5CF6' : '#e5e7eb',
                   color: selectedCity === city ? 'white' : '#333',
-                  cursor: nearbyMode ? 'not-allowed' : 'pointer',
-                  fontSize: '13px',
-                  opacity: nearbyMode ? 0.5 : 1
+                  cursor: 'pointer',
+                  fontSize: '13px'
                 }}
               >
                 {city === 'all' ? 'All Cities' : city}
@@ -261,29 +145,10 @@ export default function Explore() {
       {/* Results */}
       {filteredActivities.length === 0 ? (
         <div style={{ textAlign: 'center', marginTop: '50px', color: '#666' }}>
-          {nearbyMode ? (
-            <>
-              <p style={{ fontSize: '20px', marginBottom: '10px' }}>📍 Tidak ada kegiatan di dekat lokasi Anda</p>
-              <p>Coba perbesar radius atau pilih kota lain</p>
-              <button
-                onClick={resetToAll}
-                style={{
-                  marginTop: '20px',
-                  padding: '10px 30px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: '#8B5CF6',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
-                }}
-              >
-                Lihat Semua Kegiatan
-              </button>
-            </>
-          ) : (
-            'No activities found'
-          )}
+          <p>No activities found</p>
+          <p style={{ fontSize: '14px', marginTop: '10px' }}>
+            Total activities in database: {activities.length}
+          </p>
         </div>
       ) : (
         <div className="grid">
@@ -295,20 +160,7 @@ export default function Explore() {
                   <span className="category">{activity.category}</span>
                   <h3 style={{ margin: '10px 0' }}>{activity.title}</h3>
                   <p className="price">{activity.price}</p>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-                    <p style={{ fontSize: '12px', color: '#999' }}>📍 {activity.city}</p>
-                    {activity.distance && (
-                      <span style={{ 
-                        fontSize: '11px', 
-                        background: '#E0F2FE', 
-                        color: '#0369A1',
-                        padding: '2px 10px',
-                        borderRadius: '12px'
-                      }}>
-                        📏 {activity.distance}
-                      </span>
-                    )}
-                  </div>
+                  <p style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>📍 {activity.city}</p>
                 </div>
               </div>
             </Link>

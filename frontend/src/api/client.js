@@ -46,9 +46,6 @@ export const activitiesAPI = {
   getAll: (params) => api.get('/activities', { params }),
   getById: (id) => api.get(`/activities/${id}`),
   getCities: () => api.get('/cities'),
-  getNearby: (lat, lng, radius) => api.get('/activities/nearby', {
-    params: { lat, lng, radius }
-  }),
 };
 
 // ============ PLANS API ============
