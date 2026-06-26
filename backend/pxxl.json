@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "backend/**",
+      "use": "@pxxl/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "backend/server.js"
+    }
+  ]
+}
