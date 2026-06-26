@@ -13,16 +13,12 @@ Pengguna dapat:
 
 ## Struktur Folder
 hangouthub/
-│
 ├── README.md # Dokumentasi proyek
-│
 ├── frontend/ # Frontend React + Vite
 │ ├── src/
 │ │ ├── components/
 │ │ │ ├── Navbar.jsx # Navigasi
 │ │ │ └── LoadingSpinner.jsx # Loading indicator
-│ │ ├── context/
-│ │ │ └── AuthContext.jsx # Auth state management
 │ │ ├── pages/
 │ │ │ ├── Login.jsx # Halaman login
 │ │ │ ├── Register.jsx # Halaman register
