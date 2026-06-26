@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://hangouthub-app.pxxl.run/api';
+const API_BASE_URL = 'https://hangout-hub-app.vercel.app/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
